@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour {
     bool m_TwiceTick;
     List<Action> m_ResetAllShips = new List<Action>();
     Action<int> m_WrapThings;
+	Action<float> m_WrapBuildings;
     const float pi = 3.14f;
     public float m_ShipMoveAmount;
     float m_Health;
@@ -21,6 +22,8 @@ public class PlayerMovement : MonoBehaviour {
     float push = 3;
     float thrust = 100;
 
+	float TriggerPosZOffset = 100; //This is a random value, needs updating.
+	
     // Use this for initialization
     void Start () {
         m_StartPos = this.transform.position;
@@ -88,7 +91,7 @@ public class PlayerMovement : MonoBehaviour {
 
         if (m_TriggerStart)
         {
-
+			m_WrapBuildings(this.transfrom.position.z - TriggerPosZOffset);
         }
     }
 
@@ -175,6 +178,11 @@ public class PlayerMovement : MonoBehaviour {
         m_WrapThings = p_WrapCallback;
     }
 
+	public void SetBuildingCheckCallback(Action<float> p_buildingCheckCallback)
+	{
+		m_WrapBuildings = p_buildingCheckCallback;
+	}
+	
     private void CheckOffRoad()
     {
         if (m_Ship.transform.position.x < -22 || m_Ship.transform.position.x > 11)

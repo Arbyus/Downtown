@@ -32,7 +32,9 @@ public class LoadLevel : MonoBehaviour {
     List<GameObject> m_BuildingsInScene = new List<GameObject>();
     BuildingRow[] m_BuildingRowsInScene = new BuildingRow[30];
     float m_BuildingFrontQueue;
-
+	int m_ZOffset = -55;
+	int m_BuildingFrontPointer = 0;
+	
     // Use this for initialization
     Quaternion shipRotation = Quaternion.Euler(270, 0, 180);
 
@@ -105,21 +107,22 @@ public class LoadLevel : MonoBehaviour {
         }
 
         //lets build some buildings
-        int zOffset = -55;
+        
         //for now. 8 per row. 30 rows 240
         for( int i = 0 ; i < 30 ; ++i )
         { 
             m_BuildingRowsInScene[i] = AddNewRow();
-            m_BuildingRowsInScene[i].SetZOffset(zOffset);
-            zOffset += 70;
+            m_BuildingRowsInScene[i].SetZOffset(m_ZOffset);
+            m_ZOffset += 70;
             
         }
 
         PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
         playermov.SetWraparoundCallback(i => WraparoundObject(i));
+		playermov.SetBuildingCheckCallback(f => CheckBuildingRowWrap(f));
 
-
-        m_BuildingFrontQueue = m_BuildingRowsInScene[0].m_Buildings[0].transform.position.z;
+        m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
+		++m_BuildingFrontPointer;
         Debug.Log(m_BuildingFrontQueue);
     }
 
@@ -159,4 +162,14 @@ public class LoadLevel : MonoBehaviour {
 
         Debug.Log(index);
     }
+	
+	void CheckBuildingRowWrap(float p_TriggerZPos)
+	{
+		if(p_TriggerZPos > m_BuildingFrontQueue)
+		{
+			m_BuildingRowsInScene[m_BuildingFrontPointer].SetZOffset(m_ZOffset);
+            m_ZOffset += 70;
+			++m_BuildingFrontPointer;
+		}
+	}
 }
