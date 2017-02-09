@@ -4,7 +4,8 @@ using System.Collections;
 public class RandomController : MonoBehaviour {
 
     int m_Seed;
-
+	String m_StringSeed;
+	
     // Use this for initialization
     void Start () {
         Object.DontDestroyOnLoad(this);
@@ -22,4 +23,10 @@ public class RandomController : MonoBehaviour {
     {
         return m_Seed;
     }       
+	
+	void AddToSeed(char p_SeedAddition)
+	{
+		m_Seed += p_SeedAddition;
+	}
+	
 }

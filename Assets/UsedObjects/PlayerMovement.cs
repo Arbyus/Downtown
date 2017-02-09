@@ -44,19 +44,24 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
+	void ResetGame()
+	{
+		this.transform.position = m_StartPos;
+		foreach(Action ship in m_ResetAllShips)
+		{
+			ship();
+		}
+		m_HP.intensity = 2;
+		push = 3;
+		thrust = 100;
+		this.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+	}
+	
     void OnCollisionEnter(Collision coll)
     {
         if (coll.gameObject.tag == "Obst")
         {
-            this.transform.position = m_StartPos;
-            foreach(Action ship in m_ResetAllShips)
-            {
-                ship();
-            }
-            m_HP.intensity = 2;
-            push = 3;
-            thrust = 100;
-            this.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+            ResetGame();
         }
     }
 
@@ -164,7 +169,10 @@ public class PlayerMovement : MonoBehaviour {
             m_Ship.transform.position = shipOffset;
 
             CheckOffRoad();
-            
+            if(thrust < 1)
+			{
+				ResetGame();
+			}
         }
     }
 
@@ -189,17 +197,23 @@ public class PlayerMovement : MonoBehaviour {
         {
             //m_Health -= 0.1f;
             m_HP.intensity -= 0.01f;
-            push -= 0.001f;
-            thrust -= 0.4f;
+            push -= 0.05f;
+            thrust -= 0.5f;
         }
         else
         {
             if(m_HP.intensity < 2)
-            {
-                thrust += 0.4f;
-                push += 0.1f;
+            {            
                 m_HP.intensity += 0.01f;
             }
+			if(push < 3)
+			{
+				push += 0.05f;
+			}
+			if(thrust < 100)
+			{
+				thrust += 0.5f;
+			}
         }
     }
 
