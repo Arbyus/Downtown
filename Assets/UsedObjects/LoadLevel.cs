@@ -6,7 +6,7 @@ struct BuildingRow
 {
     public List<GameObject> m_Buildings;
     public GameObject m_Floor;
-    public float m_ZOffset;
+    public int m_ZOffset;
     public void SetZOffset(int offset)
     {
         foreach(GameObject obj in m_Buildings)
@@ -15,6 +15,10 @@ struct BuildingRow
         }
 
         m_Floor.transform.localPosition = new Vector3(m_Floor.transform.localPosition.x, m_Floor.transform.localPosition.y, offset);
+    }
+    public void SetInitialZ(int offset)
+    {
+        m_ZOffset = offset;
     }
 }
 
@@ -113,17 +117,18 @@ public class LoadLevel : MonoBehaviour {
         { 
             m_BuildingRowsInScene[i] = AddNewRow();
             m_BuildingRowsInScene[i].SetZOffset(m_ZOffset);
-            m_ZOffset += 70;
-            
+            m_BuildingRowsInScene[i].SetInitialZ(m_ZOffset);
+            m_ZOffset += 70;       
         }
 
         PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
         playermov.SetWraparoundCallback(i => WraparoundObject(i));
 		playermov.SetBuildingCheckCallback(f => CheckBuildingRowWrap(f));
+        playermov.SetResetCallback(ResetAllBuildings);
 
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
 		++m_BuildingFrontPointer;
-        Debug.Log(m_BuildingFrontQueue);
+        Debug.Log(m_ZOffset);
     }
 
     BuildingRow AddNewRow()
@@ -160,7 +165,7 @@ public class LoadLevel : MonoBehaviour {
         m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, Random.Range(-15, 20), m_ShipsInScene[index].GetComponent<shipMove>().m_OffsetPos);
         m_ShipsInScene[index].GetComponent<shipMove>().Wrapped();
 
-        Debug.Log(index);
+        //Debug.Log(index);
     }
 	
 	void CheckBuildingRowWrap(float p_TriggerZPos)
@@ -170,6 +175,24 @@ public class LoadLevel : MonoBehaviour {
 			m_BuildingRowsInScene[m_BuildingFrontPointer].SetZOffset(m_ZOffset);
             m_ZOffset += 70;
 			++m_BuildingFrontPointer;
-		}
+            if(m_BuildingFrontPointer == m_BuildingRowsInScene.Length)
+            {
+                m_BuildingFrontPointer = 0;
+            }
+            m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
+        }
 	}
+
+    void ResetAllBuildings()
+    {
+        m_BuildingFrontPointer = 0;
+        for (int i = 0; i < m_BuildingRowsInScene.Length; ++i)
+        {
+            m_BuildingRowsInScene[i].SetZOffset(m_BuildingRowsInScene[i].m_ZOffset);
+        }
+        m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
+        ++m_BuildingFrontPointer;
+        m_ZOffset = (int)m_BuildingRowsInScene[m_BuildingRowsInScene.Length - 1].m_ZOffset + 70;
+        Debug.Log(m_ZOffset);
+    }
 }

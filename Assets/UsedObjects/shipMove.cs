@@ -15,7 +15,7 @@ public class shipMove : MonoBehaviour {
         m_StartPos = this.transform.position;
         m_OffsetPos = this.transform.position.z;
         m_playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
-        m_playermov.SetResetCallback(() => ResetShip());
+        m_playermov.SetResetShipCallback(() => ResetShip());
     }
 
     public void GiveIndex(int p_ShipIndex)

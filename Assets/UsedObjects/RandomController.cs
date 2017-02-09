@@ -4,7 +4,7 @@ using System.Collections;
 public class RandomController : MonoBehaviour {
 
     int m_Seed;
-	String m_StringSeed;
+	string m_StringSeed;
 	
     // Use this for initialization
     void Start () {
