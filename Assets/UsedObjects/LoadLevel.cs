@@ -2,9 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 
+struct BuildingRow
+{
+    public List<GameObject> m_Buildings;
+    public GameObject m_Floor;
+    public float m_ZOffset;
+    public void SetZOffset(int offset)
+    {
+        foreach(GameObject obj in m_Buildings)
+        {
+            obj.transform.localPosition = new Vector3(obj.transform.localPosition.x, obj.transform.localPosition.y, offset);
+        }
+
+        m_Floor.transform.localPosition = new Vector3(m_Floor.transform.localPosition.x, m_Floor.transform.localPosition.y, offset);
+    }
+}
+
 public class LoadLevel : MonoBehaviour {
     public GameObject m_obst;
-    public GameObject m_Road;
+    public GameObject m_Floor;
     public GameObject m_Ship;
     public GameObject[] m_Buildings;
     public GameObject m_BuildingBase;
@@ -14,6 +30,9 @@ public class LoadLevel : MonoBehaviour {
     float lastIncrease = -700;
     List<GameObject> m_ShipsInScene = new List<GameObject>();
     List<GameObject> m_BuildingsInScene = new List<GameObject>();
+    BuildingRow[] m_BuildingRowsInScene = new BuildingRow[30];
+    float m_BuildingFrontQueue;
+
     // Use this for initialization
     Quaternion shipRotation = Quaternion.Euler(270, 0, 180);
 
@@ -83,51 +102,55 @@ public class LoadLevel : MonoBehaviour {
                 Place3Obst(m_ObstPointer);
             }
             m_ObstPointer += (int)m_Obstoffset;
-            //if (Mathf.Abs(lastIncrease - m_ObstPointer) > 100)
-            //{
-            //    m_Obstoffset -= 3;
-            //    lastIncrease = m_ObstPointer;
-            //}
         }
 
         //lets build some buildings
         int zOffset = -55;
-        int xOffset = -265;
-        int xCount = 0;
         //for now. 8 per row. 30 rows 240
-        for( int i = 0 ; i < 240 ; ++i )
-        {
-            GameObject newBHold = m_Buildings[Random.Range(0, 17)];
-            //newBHold.transform.position = new Vector3(xOffset, 0, zOffset);
-            newBHold = (GameObject)Instantiate(newBHold, new Vector3(0, 0, 0), Quaternion.identity);
-            m_BuildingsInScene.Add( newBHold );
-            m_BuildingsInScene[m_BuildingsInScene.Count - 1].transform.parent = m_BuildingBase.transform;
-            m_BuildingsInScene[m_BuildingsInScene.Count - 1].transform.localPosition = new Vector3(xOffset, 0, zOffset);
-
-            ++xCount;
-
-            if (xCount == 4)
-            {
-                xOffset += 100;
-            }
-            else if (xCount < 9)
-            {
-                xOffset += 70;
-            }
-            else
-            {
-                xCount = 0;
-                xOffset = -265;
-                zOffset += 70;
-            }
+        for( int i = 0 ; i < 30 ; ++i )
+        { 
+            m_BuildingRowsInScene[i] = AddNewRow();
+            m_BuildingRowsInScene[i].SetZOffset(zOffset);
+            zOffset += 70;
             
         }
 
         PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
         playermov.SetWraparoundCallback(i => WraparoundObject(i));
 
+
+        m_BuildingFrontQueue = m_BuildingRowsInScene[0].m_Buildings[0].transform.position.z;
+        Debug.Log(m_BuildingFrontQueue);
     }
-    	
+
+    BuildingRow AddNewRow()
+    {
+        BuildingRow hold = new BuildingRow();
+        hold.m_Buildings = new List<GameObject>();
+
+        int xOffset = -265;
+        for (int i = 0; i < 8; ++i)
+        {
+            hold.m_Buildings.Add((GameObject)Instantiate(m_Buildings[Random.Range(0, 17)], new Vector3(0, 0, 0), Quaternion.identity));
+            hold.m_Buildings[hold.m_Buildings.Count-1].transform.parent = m_BuildingBase.transform;
+            hold.m_Buildings[hold.m_Buildings.Count - 1].transform.localPosition = new Vector3(xOffset, 0, 0);
+            if (i == 3)
+            {
+                xOffset += 100;
+            }
+            else
+            {
+                xOffset += 70;
+            }
+        }
+
+        hold.m_Floor = (GameObject)Instantiate(m_Floor, new Vector3(0, 0, 0), Quaternion.identity);
+        hold.m_Floor.transform.parent = m_BuildingBase.transform;
+        hold.m_Floor.transform.localPosition = new Vector3(0, -3, 0);
+
+        return hold;
+    }
+
     void WraparoundObject(int index)
     {
         m_ShipsInScene[index].GetComponent<shipMove>().m_OffsetPos += m_ObstPointer;
@@ -136,9 +159,4 @@ public class LoadLevel : MonoBehaviour {
 
         Debug.Log(index);
     }
-
-	// Update is called once per frame
-	void FixedUpdate () {
-
-	}
 }
