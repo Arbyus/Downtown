@@ -31,9 +31,8 @@ public class LoadLevel : MonoBehaviour {
     int m_ObstPointer = -500;
     float m_Obstoffset = 70;
     float[] m_RoadOffsets;
-    float lastIncrease = -700;
     List<GameObject> m_ShipsInScene = new List<GameObject>();
-    List<GameObject> m_BuildingsInScene = new List<GameObject>();
+    int m_LastShipInQueue = 0;
     BuildingRow[] m_BuildingRowsInScene = new BuildingRow[30];
     float m_BuildingFrontQueue;
 	int m_ZOffset = -55;
@@ -109,11 +108,12 @@ public class LoadLevel : MonoBehaviour {
             }
             m_ObstPointer += (int)m_Obstoffset;
         }
+        m_LastShipInQueue = m_ShipsInScene.Count - 1;
 
         //lets build some buildings
-        
+
         //for now. 8 per row. 30 rows 240
-        for( int i = 0 ; i < 30 ; ++i )
+        for ( int i = 0 ; i < 30 ; ++i )
         { 
             m_BuildingRowsInScene[i] = AddNewRow();
             m_BuildingRowsInScene[i].SetZOffset(m_ZOffset);
@@ -161,11 +161,10 @@ public class LoadLevel : MonoBehaviour {
 
     void WraparoundObject(int index)
     {
-        m_ShipsInScene[index].GetComponent<shipMove>().m_OffsetPos += m_ObstPointer;
-        m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, Random.Range(-15, 20), m_ShipsInScene[index].GetComponent<shipMove>().m_OffsetPos);
+        m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, Random.Range(-15, 20), m_ShipsInScene[m_LastShipInQueue].transform.position.z + (int)m_Obstoffset);
+        m_LastShipInQueue = index;
         m_ShipsInScene[index].GetComponent<shipMove>().Wrapped();
-
-        //Debug.Log(index);
+        Debug.Log(index);
     }
 	
 	void CheckBuildingRowWrap(float p_TriggerZPos)
@@ -193,6 +192,5 @@ public class LoadLevel : MonoBehaviour {
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
         ++m_BuildingFrontPointer;
         m_ZOffset = (int)m_BuildingRowsInScene[m_BuildingRowsInScene.Length - 1].m_ZOffset + 70;
-        Debug.Log(m_ZOffset);
     }
 }

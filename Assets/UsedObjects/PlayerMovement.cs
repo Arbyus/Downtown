@@ -18,7 +18,6 @@ public class PlayerMovement : MonoBehaviour {
 	Action<float> m_WrapBuildings;
     const float pi = 3.14f;
     public float m_ShipMoveAmount;
-    float m_Health;
     public Light m_HP;
     float push = 3;
     float thrust = 100;
@@ -34,7 +33,6 @@ public class PlayerMovement : MonoBehaviour {
         m_IsJumping = false;
         m_TwiceTick = false;
         m_ShipMoveAmount = 0;
-        m_Health = 100;
     }
 
     void OnTriggerEnter(Collider other)
