@@ -10,19 +10,14 @@ public class PlayerMovement : MonoBehaviour {
     Vector3 m_StartPos;
     public bool m_TriggerStart;
     bool m_GameStart;
-    bool m_IsJumping;
-    bool m_TwiceTick;
-    List<Action> m_ResetAllShips = new List<Action>();
+    //bool m_IsJumping;
+    //bool m_TwiceTick;
     Action<int> m_WrapThings;
     Action m_Reset;
 	Action<float> m_WrapBuildings;
-    const float pi = 3.14f;
-    public float m_ShipMoveAmount;
-    public Light m_HP;
     float push = 3;
     float thrust = 100;
-
-	float TriggerPosZOffset = 132; //This is a random value, needs updating.
+	float TriggerPosZOffset = 132;
 	
     // Use this for initialization
     void Start () {
@@ -30,9 +25,8 @@ public class PlayerMovement : MonoBehaviour {
         m_PlayerPos = this.transform.position;
         m_TriggerStart = false;
         m_GameStart = false;
-        m_IsJumping = false;
-        m_TwiceTick = false;
-        m_ShipMoveAmount = 0;
+        //m_IsJumping = false;
+        //m_TwiceTick = false;
     }
 
     void OnTriggerEnter(Collider other)
@@ -47,10 +41,6 @@ public class PlayerMovement : MonoBehaviour {
 	{
         m_Reset();
         this.transform.position = m_StartPos;
-		foreach(Action ship in m_ResetAllShips)
-		{
-			ship();
-		}
 		m_HP.intensity = 2;
 		push = 3;
 		thrust = 100;
@@ -82,16 +72,15 @@ public class PlayerMovement : MonoBehaviour {
                 if (v.y < 0.1 && v.y > -0.1)
                 {
                     m_TriggerStart = true;
-                    m_ShipMoveAmount = 0.8f;
                 }
             }
         }
 
-        if ((GvrController.ClickButtonDown || Input.GetKeyDown(KeyCode.Space)) && !m_IsJumping && !m_TwiceTick && m_TriggerStart)
-        {
-            //m_JumpLogic.Jump();
-            //m_IsJumping = true;
-        }
+        // if ((GvrController.ClickButtonDown || Input.GetKeyDown(KeyCode.Space)) && !m_IsJumping && !m_TwiceTick && m_TriggerStart)
+        // {
+            // m_JumpLogic.Jump();
+            // m_IsJumping = true;
+        // }
 
         if (m_TriggerStart)
         {
@@ -104,33 +93,31 @@ public class PlayerMovement : MonoBehaviour {
         if (m_TriggerStart)
         {
             //this.GetComponent<Rigidbody>().AddForce(new Vector3(0, 0, 16 * this.GetComponent<Rigidbody>().mass));
-
             //if (this.GetComponent<Rigidbody>().velocity.z > 20)
             //{
             //    this.GetComponent<Rigidbody>().velocity = this.GetComponent<Rigidbody>().velocity.normalized * 20;
             //}
-            this.GetComponent<Rigidbody>().velocity = new Vector3( this.GetComponent<Rigidbody>().velocity.x, this.GetComponent<Rigidbody>().velocity.y, thrust);
-
-            if (m_IsJumping)
-            {
-                if(!m_TwiceTick)
-                {
-                    float pushforce = 18f * (float)this.GetComponent<Rigidbody>().mass;
-                    this.GetComponent<Rigidbody>().AddForce(new Vector3(0, pushforce, 0), ForceMode.Impulse);
-                    m_TwiceTick = true;
-                }
-                else
-                {
-                    float pushforce = 18f * (float)this.GetComponent<Rigidbody>().mass;
-                    this.GetComponent<Rigidbody>().AddForce(new Vector3(0, pushforce, 0), ForceMode.Impulse);
-                    m_TwiceTick = false;
-                }
-            }
-            if(Math.Abs(this.GetComponent<Rigidbody>().velocity.y)>5 && m_IsJumping == true)
-            {
-                m_IsJumping = false;
-            }
+            // if (m_IsJumping)
+            // {
+                // if(!m_TwiceTick)
+                // {
+                    // float pushforce = 18f * (float)this.GetComponent<Rigidbody>().mass;
+                    // this.GetComponent<Rigidbody>().AddForce(new Vector3(0, pushforce, 0), ForceMode.Impulse);
+                    // m_TwiceTick = true;
+                // }
+                // else
+                // {
+                    // float pushforce = 18f * (float)this.GetComponent<Rigidbody>().mass;
+                    // this.GetComponent<Rigidbody>().AddForce(new Vector3(0, pushforce, 0), ForceMode.Impulse);
+                    // m_TwiceTick = false;
+                // }
+            // }
+            // if(Math.Abs(this.GetComponent<Rigidbody>().velocity.y)>5 && m_IsJumping == true)
+            // {
+                // m_IsJumping = false;
+            // }
             
+			this.GetComponent<Rigidbody>().velocity = new Vector3( this.GetComponent<Rigidbody>().velocity.x, this.GetComponent<Rigidbody>().velocity.y, thrust);
 
             Vector3 v = GvrController.Orientation * Vector3.forward;
 
@@ -168,16 +155,12 @@ public class PlayerMovement : MonoBehaviour {
             m_Ship.transform.position = shipOffset;
 
             CheckOffRoad();
+			
             if(thrust < 1)
 			{
 				ResetGame();
 			}
         }
-    }
-
-    public void SetResetShipCallback(Action p_ResetCallback)
-    {
-        m_ResetAllShips.Add(p_ResetCallback);
     }
 
     public void SetWraparoundCallback(Action<int> p_WrapCallback)
@@ -202,7 +185,7 @@ public class PlayerMovement : MonoBehaviour {
             //m_Health -= 0.1f;
             m_HP.intensity -= 0.01f;
             push -= 0.05f;
-            thrust -= 0.5f;
+            thrust -= 0.2f;
         }
         else
         {
@@ -216,7 +199,7 @@ public class PlayerMovement : MonoBehaviour {
 			}
 			if(thrust < 100)
 			{
-				thrust += 0.5f;
+				thrust += 0.2f;
 			}
         }
     }

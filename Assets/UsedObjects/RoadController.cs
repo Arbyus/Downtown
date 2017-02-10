@@ -3,26 +3,43 @@ using System.Collections;
 
 public class RoadController : MonoBehaviour {
 
-    public GameObject r0;
-    public GameObject r1;
-    bool m_CurrentlyInsideR0 = true;
+	public GameObject[] m_roads;
+	int m_CurrentlyInside = 1;
     bool m_InitialSpawn = true;
 
     void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag == "PlayerCont" && !m_InitialSpawn)
         {
-            if( m_CurrentlyInsideR0 )
-            {
-                r0.transform.Find("SP");
-                //Move R0, we have left and entered R1
-                m_CurrentlyInsideR0 = false;
-            }
-            else
-            {
-                //move R1
-                m_CurrentlyInsideR0 = true;
-            }
+			++m_CurrentlyInside;
+			int currentLead;
+			int currentBack;
+			switch( m_CurrentlyInside )
+			{
+				case 0:
+					currentLead = 2;
+					currentBack = 3;	
+					;break;
+				case 1:
+					currentLead = 3;
+					currentBack = 4;	
+					;break;
+				case 2:
+				    currentLead = 4;
+					currentBack = 0;	
+					;break;
+				case 3:
+				    currentLead = 0;
+					currentBack = 1;	
+					;break;
+				case 4:
+					currentLead = 1;
+					currentBack = 2;	
+					;break;
+			}
+			
+			float newRoadPos = m_roads[currentLead].transform.Find("nextRoadPointer").transform.position.z;
+			m_roads[currentBack].transform.position = new Vector3(m_roads[currentBack].transform.position.x, m_roads[currentBack].transform.position.y, newRoadPos);
         }
     }
 

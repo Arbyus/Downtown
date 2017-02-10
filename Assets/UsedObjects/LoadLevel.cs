@@ -124,7 +124,7 @@ public class LoadLevel : MonoBehaviour {
         PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
         playermov.SetWraparoundCallback(i => WraparoundObject(i));
 		playermov.SetBuildingCheckCallback(f => CheckBuildingRowWrap(f));
-        playermov.SetResetCallback(ResetAllBuildings);
+        playermov.SetResetCallback(ResetEverything);
 
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
 		++m_BuildingFrontPointer;
@@ -182,7 +182,7 @@ public class LoadLevel : MonoBehaviour {
         }
 	}
 
-    void ResetAllBuildings()
+    void ResetEverything()
     {
         m_BuildingFrontPointer = 0;
         for (int i = 0; i < m_BuildingRowsInScene.Length; ++i)
@@ -192,5 +192,13 @@ public class LoadLevel : MonoBehaviour {
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
         ++m_BuildingFrontPointer;
         m_ZOffset = (int)m_BuildingRowsInScene[m_BuildingRowsInScene.Length - 1].m_ZOffset + 70;
+		
+		
+		foreach(GameObject ship in m_ShipsInScene)
+		{
+			ship.GetComponent<shipMove>().ResetShip();
+		}
+		m_LastShipInQueue = m_ShipsInScene.Count - 1;
+		
     }
 }
