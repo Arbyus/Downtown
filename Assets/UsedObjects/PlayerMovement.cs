@@ -12,11 +12,10 @@ public class PlayerMovement : MonoBehaviour {
     bool m_GameStart;
     //bool m_IsJumping;
     //bool m_TwiceTick;
-    Action<int> m_WrapThings;
-    Action m_Reset;
-	Action<float> m_WrapBuildings;
+    CallbackFunctions m_CallbackFunctions;
     float push = 3;
     float thrust = 100;
+    public Light m_HealthLight;
 	float TriggerPosZOffset = 132;
 	
     // Use this for initialization
@@ -33,15 +32,15 @@ public class PlayerMovement : MonoBehaviour {
     {      
         if(other.gameObject.layer == 8)
         {
-            m_WrapThings(other.GetComponent<shipMove>().GetIndex());
+            m_CallbackFunctions.m_WrapShip(other.GetComponent<shipMove>().GetIndex());
         }
     }
 
 	void ResetGame()
 	{
-        m_Reset();
+        m_CallbackFunctions.m_ResetGame();
         this.transform.position = m_StartPos;
-		m_HP.intensity = 2;
+        m_HealthLight.intensity = 2;
 		push = 3;
 		thrust = 100;
 		this.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
@@ -71,6 +70,7 @@ public class PlayerMovement : MonoBehaviour {
             {
                 if (v.y < 0.1 && v.y > -0.1)
                 {
+                    m_CallbackFunctions.m_StartShip();
                     m_TriggerStart = true;
                 }
             }
@@ -84,7 +84,7 @@ public class PlayerMovement : MonoBehaviour {
 
         if (m_TriggerStart)
         {
-			m_WrapBuildings(this.transform.position.z - TriggerPosZOffset);
+            m_CallbackFunctions.m_WrapBuildingRow(this.transform.position.z - TriggerPosZOffset);
         }
     }
 
@@ -148,6 +148,8 @@ public class PlayerMovement : MonoBehaviour {
             srot.z = (v2.y / 2.9f);
             m_Ship.transform.rotation = srot;
 
+            m_PlayerPos.x = 0;
+
             this.transform.position = m_PlayerPos;
             Vector3 shipOffset = m_PlayerPos;
             shipOffset.y += 1;
@@ -163,19 +165,9 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    public void SetWraparoundCallback(Action<int> p_WrapCallback)
+    public void SetAllCallbacks(CallbackFunctions p_Callbacks)
     {
-        m_WrapThings = p_WrapCallback;
-    }
-
-	public void SetBuildingCheckCallback(Action<float> p_buildingCheckCallback)
-	{
-		m_WrapBuildings = p_buildingCheckCallback;
-	}
-
-    public void SetResetCallback(Action p_ResetCallback)
-    {
-        m_Reset = p_ResetCallback;
+        m_CallbackFunctions = p_Callbacks;
     }
 
     private void CheckOffRoad()
@@ -183,15 +175,15 @@ public class PlayerMovement : MonoBehaviour {
         if (m_Ship.transform.position.x < -22 || m_Ship.transform.position.x > 11)
         {
             //m_Health -= 0.1f;
-            m_HP.intensity -= 0.01f;
+            m_HealthLight.intensity -= 0.01f;
             push -= 0.05f;
             thrust -= 0.2f;
         }
         else
         {
-            if(m_HP.intensity < 2)
-            {            
-                m_HP.intensity += 0.01f;
+            if(m_HealthLight.intensity < 2)
+            {
+                m_HealthLight.intensity += 0.01f;
             }
 			if(push < 3)
 			{

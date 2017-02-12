@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 struct BuildingRow
 {
@@ -21,6 +22,16 @@ struct BuildingRow
         m_ZOffset = offset;
     }
 }
+
+public struct CallbackFunctions
+{
+    public Action<int> m_WrapShip;
+    public Action m_ResetGame;
+    public Action m_StartShip;
+    public Action m_StopShip;
+    public Action<float> m_WrapBuildingRow;
+}
+
 
 public class LoadLevel : MonoBehaviour {
     public GameObject m_obst;
@@ -43,47 +54,47 @@ public class LoadLevel : MonoBehaviour {
 
     void Place1Obst(int z)
     {
-        int BlockLoc = (int)(Random.value * 5);
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], Random.Range(-15, 20), z), shipRotation));
+        int BlockLoc = (int)(UnityEngine.Random.value * 5);
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
     }
 
     void Place2Obst(int z)
     {
-        int BlockLoc = (int)(Random.value * 5);
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], Random.Range(-15, 20), z), shipRotation));
+        int BlockLoc = (int)(UnityEngine.Random.value * 5);
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
 
         int BlockLoc2 = BlockLoc;
         while(BlockLoc2 == BlockLoc)
         {
-            BlockLoc2 = (int)(Random.value * 5);
+            BlockLoc2 = (int)(UnityEngine.Random.value * 5);
         }
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc2], Random.Range(-15, 20), z), shipRotation));
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc2], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
 
     }
 
     void Place3Obst(int z)
     {
-        int BlockLoc = (int)(Random.value * 5);
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], Random.Range(-15,20), z), shipRotation));
+        int BlockLoc = (int)(UnityEngine.Random.value * 5);
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15,20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
 
         int BlockLoc2 = BlockLoc;
         while (BlockLoc2 == BlockLoc)
         {
-            BlockLoc2 = (int)(Random.value * 5);
+            BlockLoc2 = (int)(UnityEngine.Random.value * 5);
         }
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc2], Random.Range(-15, 20), z), shipRotation));
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc2], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
 
         int BlockLoc3 = BlockLoc;
         while (BlockLoc3 == BlockLoc || BlockLoc3 == BlockLoc2)
         {
-            BlockLoc3 = (int)(Random.value * 5);
+            BlockLoc3 = (int)(UnityEngine.Random.value * 5);
         }
-        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc3], Random.Range(-15, 20), z), shipRotation));
+        m_ShipsInScene.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc3], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_ShipsInScene[m_ShipsInScene.Count - 1].GetComponent<shipMove>().GiveIndex(m_ShipsInScene.Count - 1);
     }
 
@@ -93,7 +104,7 @@ public class LoadLevel : MonoBehaviour {
         //build blocks
         for (int i = 0; i < 100; ++i)
         {
-            int AmountOfBlocks = (int)(Random.value * 3) + 1;
+            int AmountOfBlocks = (int)(UnityEngine.Random.value * 3) + 1;
             if (AmountOfBlocks == 1)
             {
                 Place1Obst(m_ObstPointer);
@@ -120,15 +131,18 @@ public class LoadLevel : MonoBehaviour {
             m_BuildingRowsInScene[i].SetInitialZ(m_ZOffset);
             m_ZOffset += 70;       
         }
+        CallbackFunctions CallbacksforPlayerMovement = new CallbackFunctions();
+        CallbacksforPlayerMovement.m_ResetGame = ResetEverything;
+        CallbacksforPlayerMovement.m_StartShip = StartShips;
+        CallbacksforPlayerMovement.m_StopShip = StopShips;
+        CallbacksforPlayerMovement.m_WrapBuildingRow = f => CheckBuildingRowWrap(f);
+        CallbacksforPlayerMovement.m_WrapShip = i => WraparoundShip(i);
 
         PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
-        playermov.SetWraparoundCallback(i => WraparoundObject(i));
-		playermov.SetBuildingCheckCallback(f => CheckBuildingRowWrap(f));
-        playermov.SetResetCallback(ResetEverything);
+        playermov.SetAllCallbacks(CallbacksforPlayerMovement);
 
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
 		++m_BuildingFrontPointer;
-        Debug.Log(m_ZOffset);
     }
 
     BuildingRow AddNewRow()
@@ -139,7 +153,7 @@ public class LoadLevel : MonoBehaviour {
         int xOffset = -265;
         for (int i = 0; i < 8; ++i)
         {
-            hold.m_Buildings.Add((GameObject)Instantiate(m_Buildings[Random.Range(0, 17)], new Vector3(0, 0, 0), Quaternion.identity));
+            hold.m_Buildings.Add((GameObject)Instantiate(m_Buildings[UnityEngine.Random.Range(0, 17)], new Vector3(0, 0, 0), Quaternion.identity));
             hold.m_Buildings[hold.m_Buildings.Count-1].transform.parent = m_BuildingBase.transform;
             hold.m_Buildings[hold.m_Buildings.Count - 1].transform.localPosition = new Vector3(xOffset, 0, 0);
             if (i == 3)
@@ -159,12 +173,12 @@ public class LoadLevel : MonoBehaviour {
         return hold;
     }
 
-    void WraparoundObject(int index)
+    void WraparoundShip(int index)
     {
-        m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, Random.Range(-15, 20), m_ShipsInScene[m_LastShipInQueue].transform.position.z + (int)m_Obstoffset);
+        m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, UnityEngine.Random.Range(-15, 20), m_ShipsInScene[m_LastShipInQueue].transform.position.z + (int)m_Obstoffset);
         m_LastShipInQueue = index;
         m_ShipsInScene[index].GetComponent<shipMove>().Wrapped();
-        Debug.Log(index);
+        //Debug.Log(index);
     }
 	
 	void CheckBuildingRowWrap(float p_TriggerZPos)
@@ -201,4 +215,21 @@ public class LoadLevel : MonoBehaviour {
 		m_LastShipInQueue = m_ShipsInScene.Count - 1;
 		
     }
+
+    void StartShips()
+    {
+        foreach (GameObject ship in m_ShipsInScene)
+        {
+            ship.GetComponent<shipMove>().StartShip();
+        }
+    }
+
+    void StopShips()
+    {
+        foreach (GameObject ship in m_ShipsInScene)
+        {
+            ship.GetComponent<shipMove>().StopShip();
+        }
+    }
+
 }

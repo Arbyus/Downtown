@@ -5,6 +5,7 @@ public class shipMove : MonoBehaviour {
 
     Vector3 m_CurrentPos;
     Vector3 m_StartPos;
+    float m_ShipSpeed = 0;
     public float m_OffsetPos { get; set; }
     int m_Index;
 
@@ -28,7 +29,7 @@ public class shipMove : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        m_CurrentPos.z -= m_playermov.m_ShipMoveAmount;
+        m_CurrentPos.z -= m_ShipSpeed;
         this.transform.position = m_CurrentPos;
     }
 
@@ -41,6 +42,16 @@ public class shipMove : MonoBehaviour {
     {
         this.transform.position = m_StartPos;
         m_CurrentPos = this.transform.position;
+    }
+
+    public void StartShip()
+    {
+        m_ShipSpeed = 0.8f;
+    }
+
+    public void StopShip()
+    {
+        m_ShipSpeed = 0;
     }
 
 }
