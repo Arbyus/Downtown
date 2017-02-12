@@ -36,6 +36,7 @@ public struct CallbackFunctions
 public class LoadLevel : MonoBehaviour {
     public GameObject m_obst;
     public GameObject m_Floor;
+    public GameObject m_Road;
     public GameObject m_Ship;
     public GameObject[] m_Buildings;
     public GameObject m_BuildingBase;
@@ -43,6 +44,7 @@ public class LoadLevel : MonoBehaviour {
     float m_Obstoffset = 70;
     float[] m_RoadOffsets;
     List<GameObject> m_ShipsInScene = new List<GameObject>();
+    GameObject m_RoadManager;
     int m_LastShipInQueue = 0;
     BuildingRow[] m_BuildingRowsInScene = new BuildingRow[30];
     float m_BuildingFrontQueue;
@@ -101,7 +103,7 @@ public class LoadLevel : MonoBehaviour {
     void Start () {
         m_RoadOffsets = new float[] { -12.8f, -6.4f, 0, 6.4f, 12.8f };
 
-        //build blocks
+        //build Ships
         for (int i = 0; i < 100; ++i)
         {
             int AmountOfBlocks = (int)(UnityEngine.Random.value * 3) + 1;
@@ -143,6 +145,9 @@ public class LoadLevel : MonoBehaviour {
 
         m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
 		++m_BuildingFrontPointer;
+
+        //Build road
+        m_RoadManager = (GameObject)Instantiate(m_Road, new Vector3(0, -89, -91), Quaternion.identity);
     }
 
     BuildingRow AddNewRow()
@@ -213,7 +218,10 @@ public class LoadLevel : MonoBehaviour {
 			ship.GetComponent<shipMove>().ResetShip();
 		}
 		m_LastShipInQueue = m_ShipsInScene.Count - 1;
-		
+
+        m_RoadManager.GetComponent<RoadController>().ResetRoad();
+
+
     }
 
     void StartShips()

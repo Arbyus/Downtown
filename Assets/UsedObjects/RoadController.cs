@@ -7,6 +7,15 @@ public class RoadController : MonoBehaviour {
 	int m_CurrentlyInside = 0;
     bool m_InitialSpawn = true;
 
+    void Start()
+    {
+        for( int i = 0; i < m_roads.Length; ++i )
+        {
+            m_roads[i].GetComponent<ChildCollider>().SetStartPos( new Vector3(0,0, 1975 * i ));
+        }
+    }
+
+
     public void EnteredTrigger()
     {
         if (!m_InitialSpawn)
@@ -55,6 +64,16 @@ public class RoadController : MonoBehaviour {
            // Debug.Log("FUSRT");
             m_InitialSpawn = false;         
         }
+    }
+
+    public void ResetRoad()
+    {
+         m_CurrentlyInside = 0;
+         m_InitialSpawn = true;
+         foreach(GameObject segment in m_roads)
+        {
+            segment.GetComponent<ChildCollider>().ResetRoadSegment();
+        }  
     }
 
 }
