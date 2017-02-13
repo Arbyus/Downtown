@@ -23,16 +23,6 @@ public struct BuildingRow
     }
 }
 
-public struct CallbackFunctions
-{
-    public Action<int> m_WrapShip;
-    public Action m_ResetGame;
-    public Action m_StartShip;
-    public Action m_StopShip;
-    public Action<float> m_WrapBuildingRow;
-}
-
-
 public class LoadLevel : MonoBehaviour {
     public GameObject m_obst;
     public GameObject m_Floor;
@@ -41,15 +31,7 @@ public class LoadLevel : MonoBehaviour {
     public GameObject[] m_Buildings;
     public GameObject m_BuildingBase;
     int m_ObstPointer = -500;
-    float m_Obstoffset = 70;
     float[] m_RoadOffsets;
-    List<GameObject> m_ShipsInScene = new List<GameObject>();
-    GameObject m_RoadManager;
-    int m_LastShipInQueue = 0;
-    BuildingRow[] m_BuildingRowsInScene = new BuildingRow[30];
-    float m_BuildingFrontQueue;
-	int m_ZOffset = -55;
-	int m_BuildingFrontPointer = 0;
 	
     // Use this for initialization
     Quaternion shipRotation = Quaternion.Euler(270, 0, 180);
@@ -100,92 +82,46 @@ public class LoadLevel : MonoBehaviour {
         m_Ships[m_Ships.Count - 1].GetComponent<shipMove>().GiveIndex(m_Ships.Count - 1);
     }
 
-    void Start () {
+	public void BuildGameObjects( ref GameObjectContainer p_Objects )
+	{
         m_RoadOffsets = new float[] { -12.8f, -6.4f, 0, 6.4f, 12.8f };
 
-        //build Ships
         for (int i = 0; i < 100; ++i)
         {
             int AmountOfBlocks = (int)(UnityEngine.Random.value * 3) + 1;
             if (AmountOfBlocks == 1)
             {
-                Place1Obst(m_ObstPointer);
+                Place1Obst(m_ObstPointer,ref p_Objects.ships);
             }
             else if (AmountOfBlocks == 2)
             {
-                Place2Obst(m_ObstPointer);
+                Place2Obst(m_ObstPointer,ref p_Objects.ships);
             }
             else if (AmountOfBlocks == 3)
             {
-                Place3Obst(m_ObstPointer);
+                Place3Obst(m_ObstPointer,ref p_Objects.ships);
             }
-            m_ObstPointer += (int)m_Obstoffset;
+            m_ObstPointer += (int)p_Objects.shipZOffset;
         }
-        m_LastShipInQueue = m_ShipsInScene.Count - 1;
-
-        //lets build some buildings
+        p_Objects.lastShipInQueue = p_Objects.ships.Count - 1;
+		
+		
+		//lets build some buildings
 
         //for now. 8 per row. 30 rows 240
         for ( int i = 0 ; i < 30 ; ++i )
         { 
-            m_BuildingRowsInScene[i] = AddNewRow();
-            m_BuildingRowsInScene[i].SetZOffset(m_ZOffset);
-            m_BuildingRowsInScene[i].SetInitialZ(m_ZOffset);
-            m_ZOffset += 70;       
+            p_Objects.buildingRows[i] = AddNewRow();
+            p_Objects.buildingRows[i].SetZOffset(p_Objects.BuildingZOffset);
+            p_Objects.buildingRows[i].SetInitialZ(p_Objects.BuildingZOffset);
+            p_Objects.BuildingZOffset += 70;       
         }
-        CallbackFunctions CallbacksforPlayerMovement = new CallbackFunctions();
-        CallbacksforPlayerMovement.m_ResetGame = ResetEverything;
-        CallbacksforPlayerMovement.m_StartShip = StartShips;
-        CallbacksforPlayerMovement.m_StopShip = StopShips;
-        CallbacksforPlayerMovement.m_WrapBuildingRow = f => CheckBuildingRowWrap(f);
-        CallbacksforPlayerMovement.m_WrapShip = i => WraparoundShip(i);
 
-        PlayerMovement playermov = GameObject.FindGameObjectWithTag("PlayerCont").GetComponent<PlayerMovement>();
-        playermov.SetAllCallbacks(CallbacksforPlayerMovement);
+        p_Objects.buildingFrontQueue = p_Objects.buildingRows[p_Objects.buildingFrontPointer].m_Buildings[0].transform.position.z;
+		++p_Objects.buildingFrontPointer;
 
-        m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
-		++m_BuildingFrontPointer;
-
-        //Build road
-        m_RoadManager = (GameObject)Instantiate(m_Road, new Vector3(0, -89, -91), Quaternion.identity);
+        p_Objects.roadManager = (GameObject)Instantiate(m_Road, new Vector3(0, -89, -91), Quaternion.identity);
     }
-
-	void BuildGameObjects( ref GameObjectContainer p_Objects )
-	{
-		for (int i = 0; i < 100; ++i)
-        {
-            int AmountOfBlocks = (int)(UnityEngine.Random.value * 3) + 1;
-            if (AmountOfBlocks == 1)
-            {
-                Place1Obst(m_ObstPointer,p_Objects.m_Ships);
-            }
-            else if (AmountOfBlocks == 2)
-            {
-                Place2Obst(m_ObstPointer,p_Objects.m_Ships);
-            }
-            else if (AmountOfBlocks == 3)
-            {
-                Place3Obst(m_ObstPointer,p_Objects.m_Ships);
-            }
-            m_ObstPointer += (int)m_Obstoffset;
-        }
-        m_LastShipInQueue = p_Objects.m_Ships.Count - 1;
-		
-		
-		        //lets build some buildings
-
-        //for now. 8 per row. 30 rows 240
-        for ( int i = 0 ; i < 30 ; ++i )
-        { 
-            p_Objects.m_BuildingRows[i] = AddNewRow();
-            p_Objects.m_BuildingRows[i].SetZOffset(m_ZOffset);
-            p_Objects.m_BuildingRows[i].SetInitialZ(m_ZOffset);
-            m_ZOffset += 70;       
-        }
-
-        m_BuildingFrontQueue = p_Objects.m_BuildingRows[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
-		++m_BuildingFrontPointer;
-	}
 	
     BuildingRow AddNewRow()
     {
@@ -215,66 +151,66 @@ public class LoadLevel : MonoBehaviour {
         return hold;
     }
 
-    void WraparoundShip(int index)
-    {
-        m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, UnityEngine.Random.Range(-15, 20), m_ShipsInScene[m_LastShipInQueue].transform.position.z + (int)m_Obstoffset);
-        m_LastShipInQueue = index;
-        m_ShipsInScene[index].GetComponent<shipMove>().Wrapped();
-        //Debug.Log(index);
-    }
+ //   void WraparoundShip(int index)
+ //   {
+ //       m_ShipsInScene[index].transform.position = new Vector3(m_ShipsInScene[index].transform.position.x, UnityEngine.Random.Range(-15, 20), m_ShipsInScene[m_LastShipInQueue].transform.position.z + (int)m_Obstoffset);
+ //       m_LastShipInQueue = index;
+ //       m_ShipsInScene[index].GetComponent<shipMove>().Wrapped();
+ //       //Debug.Log(index);
+ //   }
 	
-	void CheckBuildingRowWrap(float p_TriggerZPos)
-	{
-		if(p_TriggerZPos > m_BuildingFrontQueue)
-		{
-			m_BuildingRowsInScene[m_BuildingFrontPointer].SetZOffset(m_ZOffset);
-            m_ZOffset += 70;
-			++m_BuildingFrontPointer;
-            if(m_BuildingFrontPointer == m_BuildingRowsInScene.Length)
-            {
-                m_BuildingFrontPointer = 0;
-            }
-            m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
-        }
-	}
+	//void CheckBuildingRowWrap(float p_TriggerZPos)
+	//{
+	//	if(p_TriggerZPos > m_BuildingFrontQueue)
+	//	{
+	//		m_BuildingRowsInScene[m_BuildingFrontPointer].SetZOffset(m_ZOffset);
+ //           m_ZOffset += 70;
+	//		++m_BuildingFrontPointer;
+ //           if(m_BuildingFrontPointer == m_BuildingRowsInScene.Length)
+ //           {
+ //               m_BuildingFrontPointer = 0;
+ //           }
+ //           m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
+ //       }
+	//}
 
-    void ResetEverything()
-    {
-        m_BuildingFrontPointer = 0;
-        for (int i = 0; i < m_BuildingRowsInScene.Length; ++i)
-        {
-            m_BuildingRowsInScene[i].SetZOffset(m_BuildingRowsInScene[i].m_ZOffset);
-        }
-        m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
-        ++m_BuildingFrontPointer;
-        m_ZOffset = (int)m_BuildingRowsInScene[m_BuildingRowsInScene.Length - 1].m_ZOffset + 70;
+ //   void ResetEverything()
+ //   {
+ //       m_BuildingFrontPointer = 0;
+ //       for (int i = 0; i < m_BuildingRowsInScene.Length; ++i)
+ //       {
+ //           m_BuildingRowsInScene[i].SetZOffset(m_BuildingRowsInScene[i].m_ZOffset);
+ //       }
+ //       m_BuildingFrontQueue = m_BuildingRowsInScene[m_BuildingFrontPointer].m_Buildings[0].transform.position.z;
+ //       ++m_BuildingFrontPointer;
+ //       m_ZOffset = (int)m_BuildingRowsInScene[m_BuildingRowsInScene.Length - 1].m_ZOffset + 70;
 		
 		
-		foreach(GameObject ship in m_ShipsInScene)
-		{
-			ship.GetComponent<shipMove>().ResetShip();
-		}
-		m_LastShipInQueue = m_ShipsInScene.Count - 1;
+	//	foreach(GameObject ship in m_ShipsInScene)
+	//	{
+	//		ship.GetComponent<shipMove>().ResetShip();
+	//	}
+	//	m_LastShipInQueue = m_ShipsInScene.Count - 1;
 
-        m_RoadManager.GetComponent<RoadController>().ResetRoad();
+ //       m_RoadManager.GetComponent<RoadController>().ResetRoad();
 
 
-    }
+ //   }
 
-    void StartShips()
-    {
-        foreach (GameObject ship in m_ShipsInScene)
-        {
-            ship.GetComponent<shipMove>().StartShip();
-        }
-    }
+ //   void StartShips()
+ //   {
+ //       foreach (GameObject ship in m_ShipsInScene)
+ //       {
+ //           ship.GetComponent<shipMove>().StartShip();
+ //       }
+ //   }
 
-    void StopShips()
-    {
-        foreach (GameObject ship in m_ShipsInScene)
-        {
-            ship.GetComponent<shipMove>().StopShip();
-        }
-    }
+ //   void StopShips()
+ //   {
+ //       foreach (GameObject ship in m_ShipsInScene)
+ //       {
+ //           ship.GetComponent<shipMove>().StopShip();
+ //       }
+ //   }
 
 }
