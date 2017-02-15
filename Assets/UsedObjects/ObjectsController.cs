@@ -6,6 +6,7 @@ using System;
 public struct GameObjectContainer
 {
    public List<GameObject> ships;
+   public List<GameObject> scoreObjects;
    public BuildingRow[] buildingRows;
    public GameObject roadManager;
    public float buildingFrontQueue;
@@ -16,6 +17,7 @@ public struct GameObjectContainer
     public void Initialise()
     {
         ships = new List<GameObject>();
+		scoreObjects = new List<GameObject>();
         buildingRows = new BuildingRow[30];
         shipZOffset = 70;
         BuildingZOffset = -55;

@@ -86,6 +86,8 @@ public class LoadLevel : MonoBehaviour {
 	{
         m_RoadOffsets = new float[] { -12.8f, -6.4f, 0, 6.4f, 12.8f };
 
+		
+		//Build ships
         for (int i = 0; i < 100; ++i)
         {
             int AmountOfBlocks = (int)(UnityEngine.Random.value * 3) + 1;
@@ -105,10 +107,16 @@ public class LoadLevel : MonoBehaviour {
         }
         p_Objects.lastShipInQueue = p_Objects.ships.Count - 1;
 		
+		//Build ScoreObjects
+		//TODO: Needs a z counter. Just 0 now.
+		for (int i = 0; i < 100; ++i)
+        {
+        int BlockLoc = (int)(UnityEngine.Random.value * 5);
+        p_Objects.scoreObjects.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15, 20), 0), shipRotation));
+        p_Objects.scoreObjects[p_Objects.scoreObjects.Count - 1].GetComponent<shipMove>().GiveIndex(p_Objects.scoreObjects.Count - 1);
+        }
 		
-		//lets build some buildings
-
-        //for now. 8 per row. 30 rows 240
+		//Build Buildings
         for ( int i = 0 ; i < 30 ; ++i )
         { 
             p_Objects.buildingRows[i] = AddNewRow();
@@ -120,6 +128,7 @@ public class LoadLevel : MonoBehaviour {
         p_Objects.buildingFrontQueue = p_Objects.buildingRows[p_Objects.buildingFrontPointer].m_Buildings[0].transform.position.z;
 		++p_Objects.buildingFrontPointer;
 
+		//Instantiate RoadManager
         p_Objects.roadManager = (GameObject)Instantiate(m_Road, new Vector3(0, -89, -91), Quaternion.identity);
     }
 	
