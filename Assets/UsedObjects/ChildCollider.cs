@@ -20,7 +20,8 @@ public class ChildCollider : MonoBehaviour {
 
     public void ResetRoadSegment()
     {
-        this.transform.position = m_StartPos;
+        //this.transform.position = m_StartPos;
+        this.transform.localPosition = m_StartPos;
     }
 
 }
