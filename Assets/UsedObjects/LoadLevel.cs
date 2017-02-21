@@ -68,7 +68,6 @@ public class LoadLevel : MonoBehaviour {
         }
         m_Ships.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc2], UnityEngine.Random.Range(-15, 20), z), shipRotation));
         m_Ships[m_Ships.Count - 1].GetComponent<shipMove>().GiveIndex(m_Ships.Count - 1);
-
     }
 
     void Place3Obst(int z, ref List<GameObject> m_Ships)
@@ -121,12 +120,12 @@ public class LoadLevel : MonoBehaviour {
 		
 		//Build ScoreObjects
 		//TODO: Needs a z counter. Just 0 now.
-		for (int i = 0; i < 100; ++i)
-        {
-        int BlockLoc = (int)(UnityEngine.Random.value * 5);
-        p_Objects.scoreObjects.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15, 20), 0), shipRotation));
-        p_Objects.scoreObjects[p_Objects.scoreObjects.Count - 1].GetComponent<shipMove>().GiveIndex(p_Objects.scoreObjects.Count - 1);
-        }
+		//for (int i = 0; i < 100; ++i)
+  //      {
+  //      int BlockLoc = (int)(UnityEngine.Random.value * 5);
+  //      p_Objects.scoreObjects.Add((GameObject)Instantiate(m_obst, new Vector3(m_RoadOffsets[BlockLoc], UnityEngine.Random.Range(-15, 20), 0), shipRotation));
+  //      p_Objects.scoreObjects[p_Objects.scoreObjects.Count - 1].GetComponent<shipMove>().GiveIndex(p_Objects.scoreObjects.Count - 1);
+  //      }
 		
 		//Build Buildings
         for ( int i = 0 ; i < 30 ; ++i )

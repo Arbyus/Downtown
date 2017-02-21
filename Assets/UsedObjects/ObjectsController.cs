@@ -37,7 +37,6 @@ public struct CallbackFunctions
 
 public class ObjectsController : MonoBehaviour {
 	GameObjectContainer m_Objects;
-    int pulse = 2;
 
     void Start () {
         m_Objects = new GameObjectContainer();
@@ -64,7 +63,7 @@ public class ObjectsController : MonoBehaviour {
 	
 	void CheckBuildingRowWrap(float p_TriggerZPos)
 	{
-		if(p_TriggerZPos > m_Objects.buildingFrontQueue)
+        if (p_TriggerZPos > m_Objects.buildingFrontQueue)
 		{
             m_Objects.buildingRows[m_Objects.buildingFrontPointer].SetZOffset(m_Objects.BuildingZOffset);
             m_Objects.BuildingZOffset += 70;
@@ -86,7 +85,7 @@ public class ObjectsController : MonoBehaviour {
         }
         m_Objects.buildingFrontQueue = m_Objects.buildingRows[m_Objects.buildingFrontPointer].m_Buildings[0].transform.position.z;
         ++m_Objects.buildingFrontPointer;
-        m_Objects.shipZOffset = (int)m_Objects.buildingRows[m_Objects.buildingRows.Length - 1].m_ZOffset + 70;
+        m_Objects.BuildingZOffset = (int)m_Objects.buildingRows[m_Objects.buildingRows.Length - 1].m_ZOffset + 70;
 		
 		
 		foreach(GameObject ship in m_Objects.ships)
