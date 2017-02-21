@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour {
             srot.z = (v2.y / 2.9f);
             m_Ship.transform.rotation = srot;
 
-            m_PlayerPos.x = 0;
+            //m_PlayerPos.x = 0;
 
             this.transform.position = m_PlayerPos;
             Vector3 shipOffset = m_PlayerPos;

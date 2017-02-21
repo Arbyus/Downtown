@@ -21,6 +21,18 @@ public struct BuildingRow
     {
         m_ZOffset = offset;
     }
+
+    public void Pulse()
+    {
+        foreach (GameObject obj in m_Buildings)
+        {
+            Light[] bLights = obj.GetComponentsInChildren<Light>();
+            foreach(Light l in bLights)
+            {
+                l.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+            }
+        }
+    }
 }
 
 public class LoadLevel : MonoBehaviour {

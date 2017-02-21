@@ -14,6 +14,7 @@ public struct GameObjectContainer
    public float shipZOffset;
    public int buildingFrontPointer;
    public int lastShipInQueue;
+
     public void Initialise()
     {
         ships = new List<GameObject>();
@@ -21,8 +22,7 @@ public struct GameObjectContainer
         buildingRows = new BuildingRow[30];
         shipZOffset = 70;
         BuildingZOffset = -55;
-    }
-    
+    }   
 }
 
 public struct CallbackFunctions
@@ -37,6 +37,7 @@ public struct CallbackFunctions
 
 public class ObjectsController : MonoBehaviour {
 	GameObjectContainer m_Objects;
+    int pulse = 2;
 
     void Start () {
         m_Objects = new GameObjectContainer();
@@ -112,6 +113,15 @@ public class ObjectsController : MonoBehaviour {
         foreach (GameObject ship in m_Objects.ships)
         {
             ship.GetComponent<shipMove>().StopShip();
+        }
+    }
+
+    public void Beat()
+    {
+        for (int i = 0; i < m_Objects.buildingRows.Length; ++i)
+        {
+            m_Objects.buildingRows[i].Pulse();
+
         }
     }
 

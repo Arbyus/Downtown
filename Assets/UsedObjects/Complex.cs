@@ -256,22 +256,22 @@ namespace System.Numerics
         {
             return (new Complex(value, 0.0));
         }
-        [CLSCompliant(false)]
+
         public static implicit operator Complex(UInt16 value)
         {
             return (new Complex(value, 0.0));
         }
-        [CLSCompliant(false)]
+
         public static implicit operator Complex(UInt32 value)
         {
             return (new Complex(value, 0.0));
         }
-        [CLSCompliant(false)]
+
         public static implicit operator Complex(UInt64 value)
         {
             return (new Complex(value, 0.0));
         }
-        [CLSCompliant(false)]
+
         public static implicit operator Complex(SByte value)
         {
             return (new Complex(value, 0.0));
