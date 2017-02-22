@@ -17,7 +17,9 @@ public class Beater : MonoBehaviour {
     public AudioSource audioToBeatTo;
     public ObjectsController objC;
     public float TESTV = 6.5f;
-    double[] songData;
+
+    float[] songDataFlt = new float[2048];
+    double[] songDataStr = new double[2048];
 
     public int BitReverse(int n, int bits)
     {
@@ -79,21 +81,20 @@ public class Beater : MonoBehaviour {
             {
                 return false;
             }
-            for (int i = filePointer; i < filePointer + 2048; i += 2)
+            for (int i = 0; i < 2048; i += 2)
             {
-                inputs[point] = (songData[i]) + (i * (songData[i + 1]));
+                inputs[point] = (songDataStr[i]) + (i * (songDataStr[i + 1]));
                 ++point;
                 if (point == 1024)
                 {
                     break;
                 }
             }
-            filePointer += 2048;
             point = 0;
         }
         catch (IndexOutOfRangeException)
         {
-            Debug.Log(filePointer + " " + audioToBeatTo.clip.samples + " : " + point);
+           
         }
 
         FFT(inputs);
@@ -153,15 +154,6 @@ public class Beater : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        songData = new double[audioToBeatTo.clip.samples];
-        float[] holdFloatVals = new float[audioToBeatTo.clip.samples];
-        audioToBeatTo.clip.GetData(holdFloatVals, 0);
-
-        for (int i = 0; i < holdFloatVals.Length; ++i)
-        {
-            songData[i] = holdFloatVals[i];
-        }
-
         for (int i = 0; i < 32; ++i)
         {
             subbandHistory[i] = new double[43];
@@ -173,28 +165,34 @@ public class Beater : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        if (loaded && IsBeatAt(audioToBeatTo.timeSamples))
+        if (loaded && IsBeat())
         {
             objC.Beat();
         }
     }
 
-    public bool IsBeatAt(int seconds)
+    public bool IsBeat()
     {
-        filePointer = seconds;
-        if (filePointer < 0)
+        audioToBeatTo.clip.GetData(songDataFlt, audioToBeatTo.timeSamples);
+        for (int i = 0; i < songDataFlt.Length; ++i)
         {
-            filePointer = 0;
+            songDataStr[i] = songDataFlt[i];
         }
-        else if (filePointer > audioToBeatTo.clip.samples)
+        int sampleDiff = audioToBeatTo.timeSamples - filePointer;
+        filePointer = audioToBeatTo.timeSamples;
+
+        if (sampleDiff > 2048)
         {
-            Debug.Log("DFHJD");
-            filePointer = filePointer - audioToBeatTo.clip.samples;
+            sampleDiff = 2048;
+        }
+        else if(sampleDiff < 0)
+        {
+            sampleDiff = 0;
         }
 
-        for (int fillBuf = 0; fillBuf < 43; ++fillBuf)
+        for(int i = 0; i < sampleDiff; ++i)
         {
-            AddE();
+            Array.Copy(songDataStr, sampleDiff, songDataStr, 0, songDataStr.Length-sampleDiff);
         }
 
         return AddE();
